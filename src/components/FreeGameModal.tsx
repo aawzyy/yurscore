@@ -449,14 +449,14 @@ export function FreeGameModal({
         </div>
 
         {/* Footer */}
-        <div className="p-5 sm:p-6 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+        <div className="p-4 sm:p-6 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
           <div className="text-xs text-slate-600">
             Lapangan Digunakan:{" "}
             <span className="font-bold text-slate-900">
               {Math.min(totalCourts || 1, Math.max(1, Math.floor(players.length / 4)))} Lapangan (Court)
             </span>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-end gap-2.5 w-full sm:w-auto">
             <button
               type="button"
               onClick={onClose}
@@ -468,7 +468,7 @@ export function FreeGameModal({
               type="button"
               disabled={loading || players.length < 4}
               onClick={handleStartGame}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-[#74B72E]/25 disabled:opacity-50 cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm transition-all shadow-md shadow-[#74B72E]/25 disabled:opacity-50 cursor-pointer"
             >
               <Play className="w-4 h-4 fill-white" />
               <span>{loading ? "Menyiapkan..." : "Mulai Turnamen Sekarang"}</span>

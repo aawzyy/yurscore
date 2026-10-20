@@ -251,31 +251,31 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-16">
       {/* Top Banner Navigation */}
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-0 sm:h-16 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0">
             <Link
               href="/"
-              className="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer"
+              className="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer shrink-0"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-slate-900 text-base sm:text-lg tracking-tight">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className="font-extrabold text-slate-900 text-sm sm:text-lg tracking-tight truncate max-w-[200px] sm:max-w-none">
                   {tournament.title}
                 </span>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#74B72E]/10 text-[#32580E] border border-[#74B72E]/25">
+                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#74B72E]/10 text-[#32580E] border border-[#74B72E]/25 shrink-0">
                   {sportDef.name} • {tournament.format}
                 </span>
               </div>
-              <div className="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
+              <div className="text-[11px] sm:text-xs text-slate-500 flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5">
                 {tournament.club ? (
-                  <span className="flex items-center gap-1 text-slate-700 font-medium">
-                    <Shield className="w-3 h-3 text-[#74B72E]" /> Club: {tournament.club.name}
+                  <span className="flex items-center gap-1 text-slate-700 font-medium truncate max-w-[140px]">
+                    <Shield className="w-3 h-3 text-[#74B72E] shrink-0" /> {tournament.club.name}
                   </span>
                 ) : (
                   <span className="flex items-center gap-1 text-[#32580E] font-medium">
-                    <Zap className="w-3 h-3 text-[#74B72E]" /> Free Game
+                    <Zap className="w-3 h-3 text-[#74B72E] shrink-0" /> Free Game
                   </span>
                 )}
                 <span>• Target {tournament.targetPoints} Poin</span>
@@ -285,18 +285,18 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
           </div>
 
           {/* Tournament Status & Action */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2 shrink-0">
             {tournament.status === "COMPLETED" ? (
               <span className="px-3 py-1.5 rounded-xl bg-[#74B72E]/10 border border-[#74B72E]/30 text-[#32580E] text-xs font-bold flex items-center gap-1.5">
-                <Trophy className="w-4 h-4 text-[#74B72E]" /> Turnamen Selesai
+                <Trophy className="w-4 h-4 text-[#74B72E] shrink-0" /> Turnamen Selesai
               </span>
             ) : (
               <button
                 onClick={handleCompleteTournament}
                 disabled={completingTournament}
-                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-md shadow-[#74B72E]/20 transition-all cursor-pointer"
+                className="w-full sm:w-auto justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-md shadow-[#74B72E]/20 transition-all cursor-pointer"
               >
-                <Award className="w-4 h-4" />
+                <Award className="w-4 h-4 shrink-0" />
                 <span>{completingTournament ? "..." : "Selesaikan Turnamen"}</span>
               </button>
             )}
@@ -484,7 +484,7 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
                               : "bg-slate-50 border-slate-200"
                           }`}
                         >
-                          <div className="flex items-start justify-between gap-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="text-xs font-bold text-[#32580E] uppercase tracking-wider">
@@ -499,38 +499,41 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
                                   </span>
                                 )}
                               </div>
-                              <div className="font-extrabold text-base sm:text-lg text-slate-900">
+                              <div className="font-extrabold text-base sm:text-lg text-slate-900 leading-snug">
                                 {t1p1} {t1p2 && `& ${t1p2}`}
                               </div>
                             </div>
 
                             {/* Score Controls */}
-                            <div className="flex items-center gap-2 shrink-0">
-                              <button
-                                disabled={isCompleted}
-                                onClick={() => updateScore(match.id, 1, -1)}
-                                className="w-10 h-10 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 active:scale-95 disabled:opacity-40 text-slate-700 flex items-center justify-center font-bold text-base transition-transform cursor-pointer shadow-2xs"
-                              >
-                                <Minus className="w-4 h-4" />
-                              </button>
-                              <div className="w-14 text-center font-mono font-black text-3xl sm:text-4xl text-slate-900">
-                                {s.s1}
+                            <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/70">
+                              <span className="text-xs text-slate-400 font-semibold sm:hidden">Poin:</span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  disabled={isCompleted}
+                                  onClick={() => updateScore(match.id, 1, -1)}
+                                  className="w-10 h-10 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 active:scale-95 disabled:opacity-40 text-slate-700 flex items-center justify-center font-bold text-base transition-transform cursor-pointer shadow-2xs"
+                                >
+                                  <Minus className="w-4 h-4" />
+                                </button>
+                                <div className="w-14 text-center font-mono font-black text-3xl sm:text-4xl text-slate-900">
+                                  {s.s1}
+                                </div>
+                                <button
+                                  disabled={isCompleted}
+                                  onClick={() => updateScore(match.id, 1, 1)}
+                                  className="w-10 h-10 rounded-xl bg-[#74B72E] hover:bg-[#639E25] active:scale-95 disabled:opacity-40 text-white flex items-center justify-center font-bold text-base transition-transform cursor-pointer shadow-xs shadow-[#74B72E]/25"
+                                >
+                                  <Plus className="w-5 h-5 font-black" />
+                                </button>
                               </div>
-                              <button
-                                disabled={isCompleted}
-                                onClick={() => updateScore(match.id, 1, 1)}
-                                className="w-10 h-10 rounded-xl bg-[#74B72E] hover:bg-[#639E25] active:scale-95 disabled:opacity-40 text-white flex items-center justify-center font-bold text-base transition-transform cursor-pointer shadow-xs shadow-[#74B72E]/25"
-                              >
-                                <Plus className="w-5 h-5 font-black" />
-                              </button>
                             </div>
                           </div>
                         </div>
 
                         {/* VS Divider with quick split presets */}
-                        <div className="flex items-center justify-between px-2 text-xs text-slate-400">
+                        <div className="flex flex-wrap items-center justify-between px-1 sm:px-2 gap-2 text-xs text-slate-400">
                           <span className="font-bold tracking-widest uppercase text-slate-500">VS</span>
-                          <div className="flex items-center gap-1.5 text-[11px]">
+                          <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
                             <span className="text-slate-500 font-medium">Quick Score:</span>
                             {[
                               [18, 14],
@@ -558,7 +561,7 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
                               : "bg-slate-50 border-slate-200"
                           }`}
                         >
-                          <div className="flex items-start justify-between gap-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
@@ -573,30 +576,33 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
                                   </span>
                                 )}
                               </div>
-                              <div className="font-extrabold text-base sm:text-lg text-slate-900">
+                              <div className="font-extrabold text-base sm:text-lg text-slate-900 leading-snug">
                                 {t2p1} {t2p2 && `& ${t2p2}`}
                               </div>
                             </div>
 
                             {/* Score Controls */}
-                            <div className="flex items-center gap-2 shrink-0">
-                              <button
-                                disabled={isCompleted}
-                                onClick={() => updateScore(match.id, 2, -1)}
-                                className="w-10 h-10 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 active:scale-95 disabled:opacity-40 text-slate-700 flex items-center justify-center font-bold text-base transition-transform cursor-pointer shadow-2xs"
-                              >
-                                <Minus className="w-4 h-4" />
-                              </button>
-                              <div className="w-14 text-center font-mono font-black text-3xl sm:text-4xl text-slate-900">
-                                {s.s2}
+                            <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/70">
+                              <span className="text-xs text-slate-400 font-semibold sm:hidden">Poin:</span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  disabled={isCompleted}
+                                  onClick={() => updateScore(match.id, 2, -1)}
+                                  className="w-10 h-10 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 active:scale-95 disabled:opacity-40 text-slate-700 flex items-center justify-center font-bold text-base transition-transform cursor-pointer shadow-2xs"
+                                >
+                                  <Minus className="w-4 h-4" />
+                                </button>
+                                <div className="w-14 text-center font-mono font-black text-3xl sm:text-4xl text-slate-900">
+                                  {s.s2}
+                                </div>
+                                <button
+                                  disabled={isCompleted}
+                                  onClick={() => updateScore(match.id, 2, 1)}
+                                  className="w-10 h-10 rounded-xl bg-[#74B72E] hover:bg-[#639E25] active:scale-95 disabled:opacity-40 text-white flex items-center justify-center font-bold text-base transition-transform cursor-pointer shadow-xs shadow-[#74B72E]/25"
+                                >
+                                  <Plus className="w-5 h-5 font-black" />
+                                </button>
                               </div>
-                              <button
-                                disabled={isCompleted}
-                                onClick={() => updateScore(match.id, 2, 1)}
-                                className="w-10 h-10 rounded-xl bg-[#74B72E] hover:bg-[#639E25] active:scale-95 disabled:opacity-40 text-white flex items-center justify-center font-bold text-base transition-transform cursor-pointer shadow-xs shadow-[#74B72E]/25"
-                              >
-                                <Plus className="w-5 h-5 font-black" />
-                              </button>
                             </div>
                           </div>
                         </div>
@@ -664,10 +670,10 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
           <div className="space-y-8">
             {/* Podium for Top 3 */}
             {standings.length >= 3 && (
-              <div className="grid grid-cols-3 gap-3 sm:gap-6 pt-4 max-w-2xl mx-auto items-end">
+              <div className="grid grid-cols-3 gap-2 sm:gap-6 pt-4 max-w-2xl mx-auto items-end">
                 {/* 2nd Place */}
-                <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-2 order-1">
-                  <div className="w-10 h-10 mx-auto rounded-full bg-slate-100 text-slate-700 font-black flex items-center justify-center text-sm border border-slate-300">
+                <div className="p-2.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-1.5 sm:space-y-2 order-1">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto rounded-full bg-slate-100 text-slate-700 font-black flex items-center justify-center text-xs sm:text-sm border border-slate-300">
                     2
                   </div>
                   <div className="font-bold text-slate-900 text-xs sm:text-sm truncate">
@@ -676,30 +682,30 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
                   <div className="text-xs sm:text-base font-black font-mono text-slate-700">
                     {standings[1].pointsScored} pts
                   </div>
-                  <div className="text-[10px] text-slate-500 font-medium">
+                  <div className="text-[9px] sm:text-[10px] text-slate-500 font-medium">
                     Diff: {standings[1].pointDiff > 0 ? `+${standings[1].pointDiff}` : standings[1].pointDiff}
                   </div>
                 </div>
 
                 {/* 1st Place (Champion) */}
-                <div className="p-5 rounded-3xl bg-gradient-to-t from-white to-[#74B72E]/10 border-2 border-[#74B72E] text-center space-y-2.5 -translate-y-3 shadow-md shadow-[#74B72E]/10 order-2">
-                  <div className="w-12 h-12 mx-auto rounded-full bg-[#74B72E]/20 text-[#32580E] font-black flex items-center justify-center text-base border border-[#74B72E]/40">
-                    <Trophy className="w-6 h-6 fill-[#74B72E] text-[#74B72E]" />
+                <div className="p-3 sm:p-5 rounded-2xl sm:rounded-3xl bg-gradient-to-t from-white to-[#74B72E]/10 border-2 border-[#74B72E] text-center space-y-2 sm:space-y-2.5 -translate-y-2 sm:-translate-y-3 shadow-md shadow-[#74B72E]/10 order-2">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-full bg-[#74B72E]/20 text-[#32580E] font-black flex items-center justify-center text-sm sm:text-base border border-[#74B72E]/40">
+                    <Trophy className="w-5 h-5 sm:w-6 sm:h-6 fill-[#74B72E] text-[#74B72E]" />
                   </div>
-                  <div className="font-extrabold text-slate-900 text-sm sm:text-base truncate">
+                  <div className="font-extrabold text-slate-900 text-xs sm:text-base truncate">
                     {standings[0].name}
                   </div>
                   <div className="text-sm sm:text-xl font-black font-mono text-[#32580E]">
                     {standings[0].pointsScored} pts
                   </div>
-                  <div className="text-[11px] text-[#32580E] font-bold">
+                  <div className="text-[10px] sm:text-[11px] text-[#32580E] font-bold">
                     Diff: {standings[0].pointDiff > 0 ? `+${standings[0].pointDiff}` : standings[0].pointDiff}
                   </div>
                 </div>
 
                 {/* 3rd Place */}
-                <div className="p-4 rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-2 order-3">
-                  <div className="w-10 h-10 mx-auto rounded-full bg-amber-50 text-amber-700 font-black flex items-center justify-center text-sm border border-amber-200">
+                <div className="p-2.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-white border border-slate-200 shadow-sm text-center space-y-1.5 sm:space-y-2 order-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 mx-auto rounded-full bg-amber-50 text-amber-700 font-black flex items-center justify-center text-xs sm:text-sm border border-amber-200">
                     3
                   </div>
                   <div className="font-bold text-slate-900 text-xs sm:text-sm truncate">
@@ -708,7 +714,7 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
                   <div className="text-xs sm:text-base font-black font-mono text-slate-700">
                     {standings[2].pointsScored} pts
                   </div>
-                  <div className="text-[10px] text-slate-500 font-medium">
+                  <div className="text-[9px] sm:text-[10px] text-slate-500 font-medium">
                     Diff: {standings[2].pointDiff > 0 ? `+${standings[2].pointDiff}` : standings[2].pointDiff}
                   </div>
                 </div>

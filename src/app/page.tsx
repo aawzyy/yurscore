@@ -195,22 +195,22 @@ export default function HomePage() {
         {currentUser && viewMode === "club" && activeClub && (
           <div className="space-y-6 animate-in fade-in duration-200">
             {/* Top Breadcrumb / Navigation back to Member Dashboard */}
-            <div className="flex items-center justify-between bg-white border border-slate-200 shadow-xs p-3 rounded-2xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-slate-200 shadow-xs p-3 rounded-2xl gap-2.5">
               <button
                 onClick={() => setViewMode("dashboard")}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer w-fit shrink-0"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Kembali ke Dashboard Saya</span>
               </button>
 
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-500 mr-1 hidden sm:inline">Pilih Club:</span>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+                <span className="text-xs text-slate-500 mr-1 hidden sm:inline shrink-0">Pilih Club:</span>
                 {clubs.map((c) => (
                   <button
                     key={c.id}
                     onClick={() => setSelectedClubId(c.id)}
-                    className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                       selectedClubId === c.id
                         ? "bg-[#74B72E] text-white shadow-xs"
                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"

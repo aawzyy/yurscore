@@ -584,21 +584,21 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
           </div>
 
           {/* Quick CTA - Admin Options */}
-          <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 shrink-0">
+          <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 shrink-0 w-full md:w-auto">
             {isAdmin ? (
               <>
                 <button
                   onClick={handleOpenScheduledModal}
-                  className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm transition-all shadow-xs cursor-pointer"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm transition-all shadow-xs cursor-pointer"
                 >
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-4 h-4 shrink-0" />
                   <span>Jadwalkan Game (In-Advance)</span>
                 </button>
                 <button
                   onClick={handleOpenCreateTourney}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs transition-all shadow-xs cursor-pointer"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold text-xs transition-all shadow-xs cursor-pointer"
                 >
-                  <Play className="w-3.5 h-3.5 fill-slate-600" />
+                  <Play className="w-3.5 h-3.5 fill-slate-600 shrink-0" />
                   <span>Main Langsung (Instant)</span>
                 </button>
               </>
@@ -617,28 +617,28 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
         </div>
 
         {/* Club Quick Stats Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8 pt-6 border-t border-slate-100">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-8 pt-6 border-t border-slate-100">
           <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
             <div className="text-xs text-slate-500">Total Anggota</div>
-            <div className="text-xl font-bold text-slate-900 mt-0.5">
+            <div className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">
               {club.members.length} Pemain
             </div>
           </div>
           <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
             <div className="text-xs text-slate-500">Member Aktif</div>
-            <div className="text-xl font-bold text-[#74B72E] mt-0.5">
+            <div className="text-lg sm:text-xl font-bold text-[#74B72E] mt-0.5">
               {club.members.filter((m) => m.status === "ACTIVE").length} Siap Tanding
             </div>
           </div>
           <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
             <div className="text-xs text-slate-500">Undangan Tertunda</div>
-            <div className="text-xl font-bold text-amber-600 mt-0.5">
+            <div className="text-lg sm:text-xl font-bold text-amber-600 mt-0.5">
               {club.members.filter((m) => m.status === "PENDING_INVITE").length} Pending
             </div>
           </div>
           <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
             <div className="text-xs text-slate-500">Total Pertandingan</div>
-            <div className="text-xl font-bold text-teal-600 mt-0.5">
+            <div className="text-lg sm:text-xl font-bold text-teal-600 mt-0.5">
               {club.tournaments.length} Tersimpan
             </div>
           </div>
@@ -718,11 +718,11 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                 return (
                   <div
                     key={m.id}
-                    className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-slate-100/60 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-slate-100/60 transition-colors gap-2"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs ${
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
                           isActive
                             ? "bg-[#74B72E]/15 text-[#32580E] border border-[#74B72E]/30"
                             : "bg-amber-50 text-amber-700 border border-amber-200"
@@ -730,42 +730,39 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                       >
                         {(m.user?.name || m.invitedEmail).slice(0, 2).toUpperCase()}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs sm:text-sm font-semibold text-slate-900">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
+                          <span className="text-xs sm:text-sm font-semibold text-slate-900 truncate">
                             {m.user?.name || m.invitedEmail.split("@")[0]}
                           </span>
                           {isOwner && (
-                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 border border-purple-200 font-bold">
+                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 border border-purple-200 font-bold shrink-0">
                               Owner
                             </span>
                           )}
                           {m.role === "ADMIN" && !isOwner && (
-                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 font-bold">
+                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 font-bold shrink-0">
                               Admin
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-slate-500 truncate max-w-[180px]">
+                        <div className="text-[11px] text-slate-500 truncate max-w-[120px] sm:max-w-[180px]">
                           {m.invitedEmail}
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-right flex items-center gap-2">
+                    <div className="text-right flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-2 shrink-0">
                       {isActive ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#32580E]">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#32580E] whitespace-nowrap">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#74B72E]" />
                           Aktif ({m.user?.gender || "M"})
                         </span>
                       ) : (
                         <div className="space-y-0.5">
-                          <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                            <Clock className="w-3 h-3" /> Undangan Terkirim
+                          <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 whitespace-nowrap">
+                            <Clock className="w-3 h-3" /> Terkirim
                           </span>
-                          <div className="text-[9px] text-slate-400">
-                            Menunggu registrasi
-                          </div>
                         </div>
                       )}
 
@@ -777,7 +774,7 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                             setSelectedNewRole(isCurrentOwner ? "OWNER" : m.role);
                             setRoleError(null);
                           }}
-                          className="text-[10px] px-2 py-1 rounded-lg bg-white border border-slate-200 hover:border-[#74B72E] hover:text-[#32580E] text-slate-600 font-bold transition-colors cursor-pointer shadow-2xs shrink-0"
+                          className="text-[10px] px-2 py-1 rounded-lg bg-white border border-slate-200 hover:border-[#74B72E] hover:text-[#32580E] text-slate-600 font-bold transition-colors cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
                         >
                           Ubah Role
                         </button>
@@ -796,16 +793,16 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
           <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-slate-200 shadow-xs">
             <button
               onClick={() => setActiveTab("scheduled")}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`flex-1 py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer ${
                 activeTab === "scheduled"
                   ? "bg-[#74B72E] text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
               }`}
             >
-              <Calendar className="w-4 h-4" />
-              <span>Jadwal Game & RSVP</span>
+              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span>Jadwal & RSVP</span>
               <span
-                className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+                className={`text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-black shrink-0 ${
                   activeTab === "scheduled"
                     ? "bg-white/20 text-white"
                     : "bg-slate-100 text-slate-600"
@@ -817,16 +814,16 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
 
             <button
               onClick={() => setActiveTab("tournaments")}
-              className={`flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`flex-1 py-2 sm:py-2.5 px-2 sm:px-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-all cursor-pointer ${
                 activeTab === "tournaments"
                   ? "bg-[#74B72E] text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
               }`}
             >
-              <Trophy className="w-4 h-4" />
-              <span>Riwayat & Scoreboard</span>
+              <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+              <span>Riwayat Skor</span>
               <span
-                className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+                className={`text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-black shrink-0 ${
                   activeTab === "tournaments"
                     ? "bg-white/20 text-white"
                     : "bg-slate-100 text-slate-600"
@@ -1920,8 +1917,8 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
 
       {/* MODAL: EDIT INFO CLUB */}
       {showEditClubModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl p-6 space-y-5 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Pencil className="w-5 h-5 text-[#74B72E]" />
@@ -1992,8 +1989,8 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
 
       {/* MODAL: HAPUS CLUB */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md rounded-3xl bg-white border border-red-200 shadow-2xl p-6 space-y-5 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto rounded-3xl bg-white border border-red-200 shadow-2xl p-5 sm:p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-red-600">
                 <Trash2 className="w-5 h-5 text-red-600" />
@@ -2061,8 +2058,8 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
 
       {/* MODAL: UBAH ROLE MEMBER */}
       {roleModalMember && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl p-6 space-y-5 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-[#74B72E]" />
