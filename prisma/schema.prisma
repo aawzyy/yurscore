@@ -1,0 +1,192 @@
+// Prisma schema for YurScore
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  name         String
+  password     String       @default("password123")
+  gender       String       @default("MALE") // MALE, FEMALE, OTHER
+  avatarUrl    String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  ownedClubs        Club[]           @relation("ClubOwner")
+  memberships       ClubMember[]
+  tournaments       Tournament[]     @relation("TournamentCreator")
+  tournamentPlayers TournamentPlayer[]
+  scheduledGames    ScheduledGame[]  @relation("ScheduledGameCreator")
+  rsvps             ScheduledGameRsvp[]
+}
+
+model Club {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  code        String        @unique @default(cuid())
+  logoUrl     String?
+  ownerId     String
+  owner       User          @relation("ClubOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  members        ClubMember[]
+  tournaments    Tournament[]
+  scheduledGames ScheduledGame[]
+}
+
+model ClubMember {
+  id           String    @id @default(cuid())
+  clubId       String
+  club         Club      @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  userId       String?
+  user         User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  invitedEmail String
+  role         String    @default("MEMBER") // ADMIN, MEMBER
+  status       String    @default("PENDING_INVITE") // ACTIVE, PENDING_INVITE
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([clubId, invitedEmail])
+}
+
+// Scheduled / Advance Game booking
+model ScheduledGame {
+  id          String   @id @default(cuid())
+  clubId      String
+  club        Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  createdById String?
+  creator     User?    @relation("ScheduledGameCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  title       String
+  description String?
+  sportId     String   @default("padel")
+  format      String   @default("americano")
+  scoringMode String   @default("split_points")
+  targetPoints Int     @default(32)
+  totalCourts Int      @default(1)
+  totalRounds Int      @default(4)
+
+  scheduledAt DateTime  // The actual game date/time
+  location    String?   // Optional location info
+  maxPlayers  Int       @default(16)
+
+  // Status lifecycle: OPEN -> LOCKED -> IN_PROGRESS -> COMPLETED / CANCELLED
+  status      String    @default("OPEN") // OPEN, LOCKED, IN_PROGRESS, COMPLETED, CANCELLED
+
+  rsvpDeadline DateTime? // Optional RSVP cutoff time
+  notes        String?
+
+  // Linked tournament once the game starts
+  tournamentId String?
+
+  rsvps       ScheduledGameRsvp[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ScheduledGameRsvp {
+  id              String        @id @default(cuid())
+  scheduledGameId String
+  scheduledGame   ScheduledGame @relation(fields: [scheduledGameId], references: [id], onDelete: Cascade)
+  userId          String?
+  user            User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  memberEmail     String        // Always stored for reference
+  memberName      String        @default("Member")
+  memberGender    String        @default("MALE")
+
+  // RSVP status: PENDING (not replied), ACCEPTED, DECLINED
+  rsvpStatus     String    @default("PENDING") // PENDING, ACCEPTED, DECLINED
+  // Admin can override day-of: include player even if declined or remove even if accepted
+  dayOfStatus    String?   // null (use rsvpStatus), PLAYING, SITTING_OUT
+
+  respondedAt    DateTime?
+  note           String?   // Optional note from member ("I'll be 15 min late" etc)
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([scheduledGameId, memberEmail])
+}
+
+model Tournament {
+  id           String             @id @default(cuid())
+  title        String
+  sportId      String             @default("padel")
+  format       String             @default("americano")
+  scoringMode  String             @default("split_points")
+  targetPoints Int                @default(32)
+  totalCourts  Int                @default(1)
+  totalRounds  Int                @default(4)
+  status       String             @default("SETUP") // SETUP, IN_PROGRESS, COMPLETED
+  isFreeGame   Boolean            @default(false)
+  clubId       String?
+  club         Club?              @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  createdById  String?
+  creator      User?              @relation("TournamentCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  players      TournamentPlayer[]
+  rounds       TournamentRound[]
+}
+
+model TournamentPlayer {
+  id              String      @id @default(cuid())
+  tournamentId    String
+  tournament      Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name            String
+  gender          String      @default("MALE")
+  pointsScored    Int         @default(0)
+  pointsConceded  Int         @default(0)
+  matchesPlayed   Int         @default(0)
+  matchesWon      Int         @default(0)
+  matchesLost     Int         @default(0)
+  matchesDrawn    Int         @default(0)
+  pointDiff       Int         @default(0)
+  rank            Int         @default(1)
+  createdAt       DateTime    @default(now())
+}
+
+model TournamentRound {
+  id           String            @id @default(cuid())
+  tournamentId String
+  tournament   Tournament        @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  roundNumber  Int
+  status       String            @default("PENDING") // PENDING, ACTIVE, COMPLETED
+  createdAt    DateTime          @default(now())
+
+  matches      TournamentMatch[]
+}
+
+model TournamentMatch {
+  id             String          @id @default(cuid())
+  roundId        String
+  round          TournamentRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  courtNumber    Int             @default(1)
+
+  team1Player1Id String
+  team1Player2Id String?
+  team1Name      String          @default("Team 1")
+  team1Score     Int             @default(0)
+
+  team2Player1Id String
+  team2Player2Id String?
+  team2Name      String          @default("Team 2")
+  team2Score     Int             @default(0)
+
+  status         String          @default("UPCOMING") // UPCOMING, IN_PROGRESS, COMPLETED
+  servingTeam    Int             @default(1)
+  completedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
