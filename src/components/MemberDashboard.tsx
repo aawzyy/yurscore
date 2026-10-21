@@ -73,15 +73,15 @@ export function MemberDashboard({
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <span
-                className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
+                className={`px-2.5 py-0.5 rounded-full text-xs font-bold border flex items-center gap-1.5 ${
                   hasAdminAccess
-                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                    ? "bg-emerald-50 text-[#32580E] border-[#74B72E]/30"
                     : "bg-[#74B72E]/10 text-[#32580E] border border-[#74B72E]/25"
                 }`}
               >
                 {hasAdminAccess ? (
                   <>
-                    <Shield className="w-3.5 h-3.5 text-amber-600 shrink-0" /> Club Owner & Admin
+                    <Shield className="w-3.5 h-3.5 text-[#74B72E] shrink-0" /> Club Owner & Admin
                   </>
                 ) : (
                   <>
@@ -89,8 +89,8 @@ export function MemberDashboard({
                   </>
                 )}
               </span>
-              <span className="text-xs text-slate-500 truncate max-w-full">
-                Email: <strong className="text-slate-800">{user?.email}</strong>
+              <span className="text-xs text-slate-600 bg-slate-50 px-2.5 py-0.5 rounded-full border border-slate-200/80 truncate max-w-[220px] sm:max-w-none">
+                {user?.email}
               </span>
             </div>
 
@@ -109,7 +109,7 @@ export function MemberDashboard({
           <div className="flex flex-col sm:flex-row gap-2.5 shrink-0 w-full sm:w-auto">
             <button
               onClick={onOpenFreeGame}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
             >
               <Zap className="w-4 h-4 fill-white shrink-0" />
               <span>Main Free Game Cepat</span>

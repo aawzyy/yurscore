@@ -250,36 +250,37 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-16">
       {/* Top Banner Navigation */}
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-0 sm:h-16 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2.5 min-w-0">
+      <header className="sticky top-0 z-30 border-b border-slate-200/90 bg-white/95 backdrop-blur-md shadow-2xs">
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <Link
               href="/"
-              className="p-2 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer shrink-0"
+              className="h-8.5 w-8.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center transition-colors shadow-2xs cursor-pointer shrink-0"
+              title="Kembali ke Beranda"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className="font-extrabold text-slate-900 text-sm sm:text-lg tracking-tight truncate max-w-[200px] sm:max-w-none">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="font-extrabold text-slate-900 text-xs sm:text-base tracking-tight truncate max-w-[150px] xs:max-w-[200px] sm:max-w-none">
                   {tournament.title}
                 </span>
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#74B72E]/10 text-[#32580E] border border-[#74B72E]/25 shrink-0">
-                  {sportDef.name} • {tournament.format}
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-[#74B72E]/10 text-[#32580E] border border-[#74B72E]/25 shrink-0">
+                  {sportDef.name}
                 </span>
               </div>
-              <div className="text-[11px] sm:text-xs text-slate-500 flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5">
+              <div className="text-[10px] sm:text-xs text-slate-500 flex items-center gap-1 sm:gap-1.5 mt-0.5 truncate">
                 {tournament.club ? (
-                  <span className="flex items-center gap-1 text-slate-700 font-medium truncate max-w-[140px]">
-                    <Shield className="w-3 h-3 text-[#74B72E] shrink-0" /> {tournament.club.name}
+                  <span className="flex items-center gap-1 text-slate-700 font-medium truncate max-w-[100px] sm:max-w-[140px]">
+                    <Shield className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#74B72E] shrink-0" /> {tournament.club.name}
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-[#32580E] font-medium">
-                    <Zap className="w-3 h-3 text-[#74B72E] shrink-0" /> Free Game
+                  <span className="flex items-center gap-1 text-[#32580E] font-medium shrink-0">
+                    <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#74B72E] shrink-0" /> Free Game
                   </span>
                 )}
-                <span>• Target {tournament.targetPoints} Poin</span>
-                <span className="text-[#32580E] font-semibold">• 🏟️ {tournament.totalCourts} Lapangan</span>
+                <span className="shrink-0">• {tournament.targetPoints} Poin</span>
+                <span className="text-[#32580E] font-medium shrink-0 hidden xs:inline">• 🏟️ {tournament.totalCourts} Lap</span>
               </div>
             </div>
           </div>
@@ -287,56 +288,59 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
           {/* Tournament Status & Action */}
           <div className="flex items-center justify-end gap-2 shrink-0">
             {tournament.status === "COMPLETED" ? (
-              <span className="px-3 py-1.5 rounded-xl bg-[#74B72E]/10 border border-[#74B72E]/30 text-[#32580E] text-xs font-bold flex items-center gap-1.5">
-                <Trophy className="w-4 h-4 text-[#74B72E] shrink-0" /> Turnamen Selesai
+              <span className="h-8.5 px-2.5 sm:px-3 rounded-xl bg-[#74B72E]/10 border border-[#74B72E]/30 text-[#32580E] text-xs font-bold flex items-center gap-1.5 shrink-0">
+                <Trophy className="w-3.5 h-3.5 text-[#74B72E] shrink-0" />
+                <span className="hidden sm:inline">Turnamen Selesai</span>
+                <span className="sm:hidden">Selesai</span>
               </span>
             ) : (
               <button
                 onClick={handleCompleteTournament}
                 disabled={completingTournament}
-                className="w-full sm:w-auto justify-center px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-md shadow-[#74B72E]/20 transition-all cursor-pointer"
+                className="h-8.5 px-3 sm:px-4 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-2xs hover:shadow-xs transition-all cursor-pointer shrink-0"
               >
-                <Award className="w-4 h-4 shrink-0" />
-                <span>{completingTournament ? "..." : "Selesaikan Turnamen"}</span>
+                <Award className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">{completingTournament ? "..." : "Selesaikan Turnamen"}</span>
+                <span className="sm:hidden">{completingTournament ? "..." : "Selesaikan"}</span>
               </button>
             )}
           </div>
         </div>
 
         {/* Tab Controls */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex gap-4 border-t border-slate-200 overflow-x-auto">
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 h-11 flex items-center gap-4 sm:gap-6 border-t border-slate-200/80 overflow-x-auto whitespace-nowrap">
           <button
             onClick={() => setActiveTab("courts")}
-            className={`py-3 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
+            className={`h-11 text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 border-b-2 transition-all cursor-pointer shrink-0 ${
               activeTab === "courts"
                 ? "border-[#74B72E] text-[#32580E]"
                 : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
           >
-            <Flame className="w-4 h-4 text-[#74B72E]" />
+            <Flame className="w-3.5 h-3.5 text-[#74B72E]" />
             <span>Lapangan & Skor Live</span>
           </button>
           <button
             onClick={() => setActiveTab("standings")}
-            className={`py-3 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
+            className={`h-11 text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 border-b-2 transition-all cursor-pointer shrink-0 ${
               activeTab === "standings"
                 ? "border-[#74B72E] text-[#32580E]"
                 : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
           >
-            <Trophy className="w-4 h-4 text-[#74B72E]" />
-            <span>Papan Klasemen (Standings)</span>
+            <Trophy className="w-3.5 h-3.5 text-[#74B72E]" />
+            <span>Papan Klasemen</span>
           </button>
           <button
             onClick={() => setActiveTab("rounds")}
-            className={`py-3 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
+            className={`h-11 text-xs sm:text-sm font-bold flex items-center gap-1.5 sm:gap-2 border-b-2 transition-all cursor-pointer shrink-0 ${
               activeTab === "rounds"
                 ? "border-[#74B72E] text-[#32580E]"
                 : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
           >
-            <Clock className="w-4 h-4 text-[#74B72E]" />
-            <span>Jadwal Ronde ({tournament.rounds?.length} Ronde)</span>
+            <Clock className="w-3.5 h-3.5 text-[#74B72E]" />
+            <span>Jadwal Ronde</span>
           </button>
         </div>
       </header>
