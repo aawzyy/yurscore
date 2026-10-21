@@ -170,7 +170,7 @@ export default function HomePage() {
         onStartFreeGame={() => setShowFreeGameModal(true)}
       />
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+      <main className="flex-1 max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 w-full space-y-6 sm:space-y-8">
         {/* =========================================================================
             STATE 1: LOGGED-IN MEMBER / ADMIN DASHBOARD VIEW
            ========================================================================= */}
@@ -241,14 +241,14 @@ export default function HomePage() {
         {!currentUser && (
           <div className="space-y-8 animate-in fade-in duration-300">
             {/* Hero Section */}
-            <div className="relative rounded-3xl bg-white border border-slate-200 shadow-sm p-6 sm:p-10 overflow-hidden">
+            <div className="relative rounded-3xl bg-white border border-slate-200 shadow-sm p-5 sm:p-10 overflow-hidden">
               <div className="max-w-3xl space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#74B72E]/10 text-[#32580E] text-xs font-bold border border-[#74B72E]/25">
                   <Sparkles className="w-3.5 h-3.5 text-[#74B72E]" />
                   <span>Platform Scoring Turnamen Multi-Sport Korporasi</span>
                 </div>
 
-                <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                <h1 className="text-2xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
                   Scoring Pintar untuk{" "}
                   <span className="text-[#74B72E]">
                     Padel
@@ -256,7 +256,7 @@ export default function HomePage() {
                   & Racket Sports
                 </h1>
 
-                <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl">
+                <p className="text-xs sm:text-base text-slate-600 leading-relaxed max-w-2xl">
                   Turnamen <strong>Americano</strong> dengan rotasi pasangan seimbang, <strong>Mexicano</strong> dengan matchmaking dinamis, serta scoring langsung di lapangan dengan sistem pencatatan data club yang rapi dan profesional.
                 </p>
 
@@ -290,7 +290,7 @@ export default function HomePage() {
             {/* 2 Main Game Play Modes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Card 1: Free Game */}
-              <div className="relative group rounded-3xl bg-white border border-slate-200 shadow-xs hover:border-[#74B72E]/60 p-6 sm:p-8 transition-all flex flex-col justify-between">
+              <div className="relative group rounded-3xl bg-white border border-slate-200 shadow-xs hover:border-[#74B72E]/60 p-5 sm:p-8 transition-all flex flex-col justify-between">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
@@ -336,7 +336,7 @@ export default function HomePage() {
               </div>
 
               {/* Card 2: Club Mode */}
-              <div className="relative group rounded-3xl bg-white border border-slate-200 shadow-xs hover:border-[#74B72E]/60 p-6 sm:p-8 transition-all flex flex-col justify-between">
+              <div className="relative group rounded-3xl bg-white border border-slate-200 shadow-xs hover:border-[#74B72E]/60 p-5 sm:p-8 transition-all flex flex-col justify-between">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="w-12 h-12 rounded-2xl bg-[#74B72E]/10 border border-[#74B72E]/25 flex items-center justify-center text-[#32580E]">
@@ -387,8 +387,8 @@ export default function HomePage() {
 
       {/* Modal: Create Club */}
       {showCreateClubModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl p-6 space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-[#74B72E]" />

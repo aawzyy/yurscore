@@ -14,11 +14,14 @@
   --pantone: #74B72E;
 }
 
+html,
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Custom scrollbars - refined corporate style */

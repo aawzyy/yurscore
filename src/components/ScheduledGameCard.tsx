@@ -232,11 +232,11 @@ export function ScheduledGameCard({
           <div className="space-y-2">
             {myStatus === "PENDING" && (
               <>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-center gap-2">
                   <button
                     disabled={responding}
                     onClick={() => handleRsvp("ACCEPTED")}
-                    className="flex-1 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                    className="w-full sm:flex-1 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
                   >
                     {responding ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -248,7 +248,7 @@ export function ScheduledGameCard({
                   <button
                     disabled={responding}
                     onClick={() => handleRsvp("DECLINED")}
-                    className="flex-1 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    className="w-full sm:flex-1 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <UserX className="w-3.5 h-3.5 text-slate-400" />
                     <span>Tidak Bisa Hadir</span>

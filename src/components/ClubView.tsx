@@ -1247,7 +1247,7 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                                 effectivePlayingCount < 4 || startingGameId === game.id
                               }
                               onClick={() => handleStartScheduledGame(game.id)}
-                              className="px-5 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer shrink-0"
+                              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer shrink-0"
                             >
                               {startingGameId === game.id ? (
                                 <>
@@ -1499,7 +1499,7 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-xs text-slate-700 font-semibold">Target Poin Per Match:</span>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {[16, 21, 24, 32, 40].map((pt) => (
                         <button
                           key={pt}
@@ -1518,9 +1518,9 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                   </div>
 
                   {format === "americano" && (
-                    <div className="flex items-center justify-between border-t border-slate-200 pt-2 text-xs text-slate-700">
+                    <div className="flex flex-wrap items-center justify-between border-t border-slate-200 pt-2 text-xs text-slate-700 gap-2">
                       <span className="font-semibold">Total Ronde Pertandingan:</span>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         {[3, 4, 5, 7, 8].map((r) => (
                           <button
                             key={r}
@@ -1547,7 +1547,7 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                         Berapa court yang dipakai bertanding
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {Array.from(
                         {
                           length: Math.max(
@@ -1662,24 +1662,26 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
               </div>
             </div>
 
-            <div className="p-5 sm:p-6 border-t border-slate-100 bg-white flex items-center justify-between shrink-0">
+            <div className="p-4 sm:p-6 border-t border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
               <div className="text-xs text-slate-600">
                 Pemain Dipilih:{" "}
                 <strong className="text-slate-900 font-bold">{selectedMemberIds.length}</strong> (Minimal 4)
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
                 <button
+                  type="button"
                   onClick={() => setShowCreateModal(false)}
                   className="px-4 py-2 rounded-xl text-xs text-slate-500 hover:text-slate-800 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
+                  type="button"
                   disabled={tourneyLoading || selectedMemberIds.length < 4}
                   onClick={handleCreateTournament}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm transition-all shadow-xs disabled:opacity-50 cursor-pointer"
                 >
-                  <Play className="w-4 h-4 fill-white" />
+                  <Play className="w-4 h-4 fill-white shrink-0" />
                   <span>{tourneyLoading ? "Membuat..." : "Mulai Turnamen"}</span>
                 </button>
               </div>
@@ -1884,27 +1886,27 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                 </div>
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2">
+              <div className="pt-2 flex flex-col-reverse sm:flex-row items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowScheduledModal(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs text-slate-500 hover:text-slate-800 cursor-pointer"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs text-slate-500 hover:text-slate-800 cursor-pointer text-center"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={schedLoading}
-                  className="px-6 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
+                  className="w-full sm:w-auto justify-center px-6 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   {schedLoading ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin shrink-0" />
                       <span>Menyimpan Jadwal...</span>
                     </>
                   ) : (
                     <>
-                      <Calendar className="w-4 h-4" />
+                      <Calendar className="w-4 h-4 shrink-0" />
                       <span>Jadwalkan Game & Kirim RSVP</span>
                     </>
                   )}

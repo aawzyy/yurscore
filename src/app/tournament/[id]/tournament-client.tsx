@@ -347,9 +347,9 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
         {activeTab === "courts" && (
           <div className="space-y-6">
             {/* Round Switcher Pills */}
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200/90 shadow-2xs p-3 rounded-2xl">
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-slate-200/90 shadow-2xs p-3 rounded-2xl">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 w-full">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1 shrink-0">
                   Pilih Ronde:
                 </span>
                 {tournament.rounds?.map((r: any) => {
@@ -359,7 +359,7 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
                     <button
                       key={r.id}
                       onClick={() => setActiveRoundNumber(r.roundNumber)}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
                         isActive
                           ? "bg-[#74B72E] text-white shadow-xs"
                           : isDone
@@ -738,7 +738,7 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs sm:text-sm">
+                <table className="w-full min-w-[580px] text-left text-xs sm:text-sm whitespace-nowrap">
                   <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-wider border-b border-slate-200">
                     <tr>
                       <th className="py-3 px-4 w-12 text-center">Rank</th>
@@ -870,21 +870,21 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
                     return (
                       <div
                         key={m.id}
-                        className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs"
+                        className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs gap-3"
                       >
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">
                             Court {m.courtNumber}
                           </div>
-                          <div className="font-bold text-slate-900">
+                          <div className="font-bold text-slate-900 truncate">
                             {t1p1} {t1p2 && `& ${t1p2}`}
                           </div>
-                          <div className="text-slate-500 text-[11px] mt-0.5">
+                          <div className="text-slate-500 text-[11px] mt-0.5 truncate">
                             vs {t2p1} {t2p2 && `& ${t2p2}`}
                           </div>
                         </div>
 
-                        <div className="text-right">
+                        <div className="text-right shrink-0">
                           <div className="font-mono font-bold text-sm text-[#32580E]">
                             {m.team1Score} - {m.team2Score}
                           </div>

@@ -270,7 +270,7 @@ export function FreeGameModal({
                 <span className="text-xs font-semibold text-slate-700">
                   Target Poin per Pertandingan:
                 </span>
-                <div className="flex items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1.5">
                   {[16, 21, 24, 32, 40].map((pt) => (
                     <button
                       key={pt}
@@ -289,9 +289,9 @@ export function FreeGameModal({
               </div>
 
               {format === "americano" && (
-                <div className="flex items-center justify-between border-t border-slate-200 pt-2.5 text-xs text-slate-700">
+                <div className="flex flex-wrap items-center justify-between border-t border-slate-200 pt-2.5 text-xs text-slate-700 gap-2">
                   <span className="font-semibold">Jumlah Ronde:</span>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {[3, 4, 5, 7, 8].map((r) => (
                       <button
                         key={r}
@@ -322,7 +322,7 @@ export function FreeGameModal({
                     Tentukan berapa court padel yang digunakan untuk turnamen ini
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1.5">
                   {Array.from(
                     { length: Math.max(1, Math.floor(players.length / 4)) },
                     (_, i) => i + 1
@@ -407,7 +407,7 @@ export function FreeGameModal({
                   key={p.id || idx}
                   className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200"
                 >
-                  <span className="w-6 text-center text-xs font-bold text-slate-400">
+                  <span className="w-6 text-center text-xs font-bold text-slate-400 shrink-0">
                     #{idx + 1}
                   </span>
                   <input
@@ -415,14 +415,14 @@ export function FreeGameModal({
                     value={p.name}
                     onChange={(e) => handlePlayerChange(idx, "name", e.target.value)}
                     placeholder={`Nama Pemain ${idx + 1}`}
-                    className="flex-1 bg-transparent text-xs sm:text-sm text-slate-900 font-medium focus:outline-none placeholder:text-slate-400"
+                    className="flex-1 min-w-0 bg-transparent text-xs sm:text-sm text-slate-900 font-medium focus:outline-none placeholder:text-slate-400"
                   />
                   <select
                     value={p.gender}
                     onChange={(e) =>
                       handlePlayerChange(idx, "gender", e.target.value as any)
                     }
-                    className="bg-white border border-slate-200 text-xs rounded-lg px-2.5 py-1 text-slate-700 focus:outline-none focus:border-[#74B72E]"
+                    className="bg-white border border-slate-200 text-xs rounded-lg px-2.5 py-1 text-slate-700 focus:outline-none focus:border-[#74B72E] shrink-0"
                   >
                     <option value="MALE">Laki-laki (M)</option>
                     <option value="FEMALE">Perempuan (F)</option>
@@ -430,7 +430,7 @@ export function FreeGameModal({
                   <button
                     type="button"
                     onClick={() => handleRemovePlayer(idx)}
-                    className="p-1.5 text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
+                    className="p-1.5 text-slate-400 hover:text-red-500 transition-colors cursor-pointer shrink-0"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

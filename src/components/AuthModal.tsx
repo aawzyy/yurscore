@@ -32,7 +32,7 @@ export function AuthModal({
   availableUsers,
   onLoginSuccess,
 }: AuthModalProps) {
-  const [tab, setTab] = useState<"demo" | "login" | "register">("demo");
+  const [tab, setTab] = useState<"demo" | "login" | "register">("login");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("password123");
@@ -141,16 +141,6 @@ export function AuthModal({
         {/* Tabs */}
         <div className="flex rounded-xl bg-slate-100 p-1 mb-6 border border-slate-200">
           <button
-            onClick={() => setTab("demo")}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-              tab === "demo"
-                ? "bg-[#74B72E] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Demo Cepat (1-Klik)
-          </button>
-          <button
             onClick={() => setTab("login")}
             className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               tab === "login"
@@ -169,6 +159,16 @@ export function AuthModal({
             }`}
           >
             Daftar Akun
+          </button>
+          <button
+            onClick={() => setTab("demo")}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              tab === "demo"
+                ? "bg-[#74B72E] text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            Akun Demo
           </button>
         </div>
 

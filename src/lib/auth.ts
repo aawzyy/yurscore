@@ -8,15 +8,7 @@ export async function getCurrentUser() {
   const userId = cookieStore.get(AUTH_COOKIE)?.value;
 
   if (!userId) {
-    // Return Reza (Admin) as fallback demo user if no cookie set
-    const defaultUser =
-      (await prisma.user.findUnique({
-        where: { email: "reza@yurscore.com" },
-      })) ||
-      (await prisma.user.findFirst({
-        orderBy: { createdAt: "asc" },
-      }));
-    return defaultUser;
+    return null;
   }
 
   const user = await prisma.user.findUnique({
