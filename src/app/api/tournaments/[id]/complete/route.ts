@@ -21,8 +21,32 @@ export async function POST(
       return NextResponse.json({ error: "Turnamen tidak ditemukan" }, { status: 404 });
     }
 
-    // Recompute final standings
-    const allMatches = tournament.rounds.flatMap((r) => r.matches);
+    // Auto-mark any matches with scores as COMPLETED if they were not already
+    for (const round of tournament.rounds) {
+      for (const match of round.matches) {
+        if (
+          match.status !== "COMPLETED" &&
+          (match.team1Score > 0 || match.team2Score > 0)
+        ) {
+          await prisma.tournamentMatch.update({
+            where: { id: match.id },
+            data: { status: "COMPLETED", completedAt: new Date() },
+          });
+          match.status = "COMPLETED";
+        }
+      }
+    }
+
+    // Re-fetch all matches with updated statuses
+    const updatedTournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      include: {
+        players: true,
+        rounds: { include: { matches: true } },
+      },
+    });
+
+    const allMatches = (updatedTournament || tournament).rounds.flatMap((r) => r.matches);
     const standings = computeStandings(
       tournament.players.map((p) => ({ id: p.id, name: p.name, gender: p.gender })),
       allMatches
@@ -48,6 +72,12 @@ export async function POST(
     // Mark tournament as COMPLETED
     const updated = await prisma.tournament.update({
       where: { id: tournamentId },
+      data: { status: "COMPLETED" },
+    });
+
+    // Also mark any linked scheduled games as COMPLETED
+    await prisma.scheduledGame.updateMany({
+      where: { tournamentId },
       data: { status: "COMPLETED" },
     });
 

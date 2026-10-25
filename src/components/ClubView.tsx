@@ -142,6 +142,31 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
   const [schedLoading, setSchedLoading] = useState(false);
   const [schedError, setSchedError] = useState<string | null>(null);
 
+  // Edit Scheduled Game state
+  const [editingGame, setEditingGame] = useState<any | null>(null);
+  const [editSchedTitle, setEditSchedTitle] = useState("");
+  const [editSchedSportId, setEditSchedSportId] = useState<SportId>("padel");
+  const [editSchedFormat, setEditSchedFormat] = useState<TournamentFormat>("americano");
+  const [editSchedTargetPoints, setEditSchedTargetPoints] = useState<number>(32);
+  const [editSchedCourts, setEditSchedCourts] = useState<number>(1);
+  const [editSchedRounds, setEditSchedRounds] = useState<number>(4);
+  const [editSchedDateTime, setEditSchedDateTime] = useState<string>("");
+  const [editSchedLocation, setEditSchedLocation] = useState<string>("");
+  const [editSchedDeadline, setEditSchedDeadline] = useState<string>("");
+  const [editSchedNotes, setEditSchedNotes] = useState<string>("");
+  const [editSchedLoading, setEditSchedLoading] = useState(false);
+  const [editSchedError, setEditSchedError] = useState<string | null>(null);
+
+  // Delete Scheduled Game state
+  const [deletingGame, setDeletingGame] = useState<any | null>(null);
+  const [deleteSchedLoading, setDeleteSchedLoading] = useState(false);
+  const [deleteSchedError, setDeleteSchedError] = useState<string | null>(null);
+
+  // Delete Tournament state
+  const [deletingTourney, setDeletingTourney] = useState<any | null>(null);
+  const [deleteTourneyLoading, setDeleteTourneyLoading] = useState(false);
+  const [deleteTourneyError, setDeleteTourneyError] = useState<string | null>(null);
+
   // Edit Club modal state
   const [showEditClubModal, setShowEditClubModal] = useState(false);
   const [editClubName, setEditClubName] = useState(club.name);
@@ -442,6 +467,128 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
       setSchedError(e.message);
     } finally {
       setSchedLoading(false);
+    }
+  }
+
+  // Open Edit Scheduled Game Modal
+  function handleOpenEditScheduled(game: any) {
+    setEditingGame(game);
+    setEditSchedTitle(game.title);
+    setEditSchedSportId((game.sportId as SportId) || "padel");
+    setEditSchedFormat((game.format as TournamentFormat) || "americano");
+    setEditSchedTargetPoints(game.targetPoints || 32);
+    setEditSchedCourts(game.totalCourts || 1);
+    setEditSchedRounds(game.totalRounds || 4);
+    setEditSchedLocation(game.location || "");
+    setEditSchedNotes(game.notes || "");
+    setEditSchedError(null);
+
+    if (game.scheduledAt) {
+      const d = new Date(game.scheduledAt);
+      const tzOffset = d.getTimezoneOffset() * 60000;
+      setEditSchedDateTime(new Date(d.getTime() - tzOffset).toISOString().slice(0, 16));
+    } else {
+      setEditSchedDateTime("");
+    }
+
+    if (game.rsvpDeadline) {
+      const d = new Date(game.rsvpDeadline);
+      const tzOffset = d.getTimezoneOffset() * 60000;
+      setEditSchedDeadline(new Date(d.getTime() - tzOffset).toISOString().slice(0, 16));
+    } else {
+      setEditSchedDeadline("");
+    }
+  }
+
+  // Save Edit Scheduled Game
+  async function handleSaveEditScheduled(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingGame) return;
+    if (!editSchedTitle.trim() || !editSchedDateTime) {
+      setEditSchedError("Judul dan tanggal/jam pertandingan wajib diisi");
+      return;
+    }
+
+    setEditSchedLoading(true);
+    setEditSchedError(null);
+
+    try {
+      const res = await fetch(`/api/scheduled-games/${editingGame.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editSchedTitle.trim(),
+          sportId: editSchedSportId,
+          format: editSchedFormat,
+          targetPoints: editSchedTargetPoints,
+          totalCourts: editSchedCourts,
+          totalRounds: editSchedRounds,
+          scheduledAt: new Date(editSchedDateTime).toISOString(),
+          rsvpDeadline: editSchedDeadline ? new Date(editSchedDeadline).toISOString() : null,
+          location: editSchedLocation.trim(),
+          notes: editSchedNotes.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setEditingGame(null);
+      await fetchScheduledGames();
+      await onRefreshClub();
+    } catch (e: any) {
+      setEditSchedError(e.message);
+    } finally {
+      setEditSchedLoading(false);
+    }
+  }
+
+  // Delete Scheduled Game
+  async function handleConfirmDeleteScheduled() {
+    if (!deletingGame) return;
+
+    setDeleteSchedLoading(true);
+    setDeleteSchedError(null);
+
+    try {
+      const res = await fetch(`/api/scheduled-games/${deletingGame.id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setDeletingGame(null);
+      await fetchScheduledGames();
+      await onRefreshClub();
+    } catch (e: any) {
+      setDeleteSchedError(e.message);
+    } finally {
+      setDeleteSchedLoading(false);
+    }
+  }
+
+  // Delete Tournament
+  async function handleConfirmDeleteTournament() {
+    if (!deletingTourney) return;
+
+    setDeleteTourneyLoading(true);
+    setDeleteTourneyError(null);
+
+    try {
+      const res = await fetch(`/api/tournaments/${deletingTourney.id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setDeletingTourney(null);
+      await onRefreshClub();
+    } catch (e: any) {
+      setDeleteTourneyError(e.message);
+    } finally {
+      setDeleteTourneyLoading(false);
     }
   }
 
@@ -995,6 +1142,28 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                               </button>
                             </div>
                           )}
+
+                          {/* Admin Edit / Delete buttons */}
+                          {isAdmin && (
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                onClick={() => handleOpenEditScheduled(game)}
+                                className="h-8 px-2.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer bg-white"
+                                title="Edit jadwal"
+                              >
+                                <Pencil className="w-3.5 h-3.5 text-[#74B72E]" />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                onClick={() => { setDeletingGame(game); setDeleteSchedError(null); }}
+                                className="h-8 px-2.5 rounded-lg text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 transition-all flex items-center gap-1.5 cursor-pointer bg-white"
+                                title="Hapus jadwal"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Hapus</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
 
                         {/* Details grid */}
@@ -1347,15 +1516,30 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                             </div>
                           </div>
 
-                          <span
-                            className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                              t.status === "COMPLETED"
-                                ? "bg-slate-200 text-slate-700"
-                                : "bg-emerald-50 text-emerald-700 animate-pulse border border-emerald-200"
-                            }`}
-                          >
-                            {t.status === "COMPLETED" ? "Selesai" : "Sedang Berlangsung"}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                                t.status === "COMPLETED"
+                                  ? "bg-slate-200 text-slate-700"
+                                  : "bg-emerald-50 text-emerald-700 animate-pulse border border-emerald-200"
+                              }`}
+                            >
+                              {t.status === "COMPLETED" ? "Selesai" : "Sedang Berlangsung"}
+                            </span>
+                            {isAdmin && (
+                              <button
+                                type="button"
+                                title="Hapus Turnamen"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeletingTourney(t);
+                                }}
+                                className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
                         </div>
 
                         {/* Winner / Standings Preview */}
@@ -2207,6 +2391,287 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDIT JADWAL PERTANDINGAN */}
+      {editingGame && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden text-slate-900">
+            <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#74B72E]/10 text-[#32580E] text-xs font-semibold mb-1 border border-[#74B72E]/25">
+                  <Pencil className="w-3.5 h-3.5 text-[#74B72E]" /> Edit Jadwal Game
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Ubah Jadwal Pertandingan</h2>
+              </div>
+              <button
+                onClick={() => setEditingGame(null)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditScheduled} className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
+              {editSchedError && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600">
+                  {editSchedError}
+                </div>
+              )}
+
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">Judul Pertandingan</label>
+                <input
+                  type="text"
+                  required
+                  value={editSchedTitle}
+                  onChange={(e) => setEditSchedTitle(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">Cabang Olahraga</label>
+                  <select
+                    value={editSchedSportId}
+                    onChange={(e) => {
+                      const s = e.target.value as SportId;
+                      setEditSchedSportId(s);
+                      setEditSchedFormat(SPORTS_REGISTRY[s].defaultFormat);
+                    }}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E]"
+                  >
+                    {Object.values(SPORTS_REGISTRY).map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">Format Permainan</label>
+                  <select
+                    value={editSchedFormat}
+                    onChange={(e) => setEditSchedFormat(e.target.value as TournamentFormat)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E]"
+                  >
+                    {SPORTS_REGISTRY[editSchedSportId].supportedFormats.map((f) => (
+                      <option key={f} value={f}>{FORMAT_DESCRIPTIONS[f].name} ({FORMAT_DESCRIPTIONS[f].badge})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">Waktu Main</label>
+                  <input
+                    type="datetime-local"
+                    required
+                    value={editSchedDateTime}
+                    onChange={(e) => setEditSchedDateTime(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E]"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">Batas RSVP</label>
+                  <input
+                    type="datetime-local"
+                    value={editSchedDeadline}
+                    onChange={(e) => setEditSchedDeadline(e.target.value)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">Lokasi / Venue</label>
+                <input
+                  type="text"
+                  value={editSchedLocation}
+                  onChange={(e) => setEditSchedLocation(e.target.value)}
+                  placeholder="Misal: Cilandak Padel Club"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E]"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1 block">Lapangan</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={8}
+                    value={editSchedCourts}
+                    onChange={(e) => setEditSchedCourts(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 text-center focus:outline-none focus:border-[#74B72E]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1 block">Target Poin</label>
+                  <input
+                    type="number"
+                    min={11}
+                    max={50}
+                    value={editSchedTargetPoints}
+                    onChange={(e) => setEditSchedTargetPoints(parseInt(e.target.value) || 32)}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 text-center focus:outline-none focus:border-[#74B72E]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-700 mb-1 block">Total Ronde</label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={12}
+                    value={editSchedRounds}
+                    onChange={(e) => setEditSchedRounds(Math.max(1, parseInt(e.target.value) || 4))}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 text-center focus:outline-none focus:border-[#74B72E]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5 block">Catatan untuk Member</label>
+                <textarea
+                  rows={2}
+                  value={editSchedNotes}
+                  onChange={(e) => setEditSchedNotes(e.target.value)}
+                  placeholder="Misal: Harap bawa handuk. Bola disediakan."
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E]"
+                />
+              </div>
+
+              <div className="pt-2 flex flex-col-reverse sm:flex-row items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingGame(null)}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs text-slate-500 hover:text-slate-800 cursor-pointer text-center"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSchedLoading}
+                  className="w-full sm:w-auto justify-center px-6 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
+                >
+                  {editSchedLoading ? (
+                    <><Loader2 className="w-4 h-4 animate-spin shrink-0" /><span>Menyimpan...</span></>
+                  ) : (
+                    <><Check className="w-4 h-4 shrink-0" /><span>Simpan Perubahan</span></>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: KONFIRMASI HAPUS JADWAL */}
+      {deletingGame && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                  <Trash2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Hapus Jadwal Game?</h3>
+                  <p className="text-xs text-slate-500">Konfirmasi pembatalan jadwal ini</p>
+                </div>
+              </div>
+              <button onClick={() => setDeletingGame(null)} className="p-1 rounded-xl text-slate-400 hover:text-slate-600 cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {deleteSchedError && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600">{deleteSchedError}</div>
+            )}
+
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 space-y-1.5 leading-relaxed">
+              <div>Jadwal yang akan dihapus: <strong className="text-slate-950">{deletingGame.title}</strong></div>
+              <div className="text-rose-600 font-medium">⚠️ Seluruh data RSVP pada jadwal ini ikut terhapus. Tindakan ini tidak dapat dibatalkan.</div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDeletingGame(null)}
+                disabled={deleteSchedLoading}
+                className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={deleteSchedLoading}
+                onClick={handleConfirmDeleteScheduled}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
+              >
+                {deleteSchedLoading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin shrink-0" /><span>Menghapus...</span></>
+                ) : (
+                  <><Trash2 className="w-4 h-4 shrink-0" /><span>Ya, Hapus Jadwal</span></>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: KONFIRMASI HAPUS TURNAMEN */}
+      {deletingTourney && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                  <Trash2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Hapus Turnamen?</h3>
+                  <p className="text-xs text-slate-500">Konfirmasi penghapusan riwayat turnamen</p>
+                </div>
+              </div>
+              <button onClick={() => setDeletingTourney(null)} className="p-1 rounded-xl text-slate-400 hover:text-slate-600 cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {deleteTourneyError && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600">{deleteTourneyError}</div>
+            )}
+
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 space-y-1.5 leading-relaxed">
+              <div>Turnamen yang akan dihapus: <strong className="text-slate-950">{deletingTourney.title}</strong></div>
+              <div className="text-rose-600 font-medium">⚠️ Seluruh ronde pertandingan, perolehan skor pemain, dan podium pada turnamen ini akan dihapus secara permanen.</div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDeletingTourney(null)}
+                disabled={deleteTourneyLoading}
+                className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={deleteTourneyLoading}
+                onClick={handleConfirmDeleteTournament}
+                className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xs disabled:opacity-50 cursor-pointer"
+              >
+                {deleteTourneyLoading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin shrink-0" /><span>Menghapus...</span></>
+                ) : (
+                  <><Trash2 className="w-4 h-4 shrink-0" /><span>Ya, Hapus Turnamen</span></>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

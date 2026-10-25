@@ -466,6 +466,14 @@ export function MemberDashboard({
                         </div>
                         <div className="text-[11px] text-slate-500 font-mono">
                           <strong className="text-[#74B72E]">{h.myPoints}</strong> Poin
+                          {h.myMatches > 0 && (
+                            <span className="text-[10px] text-slate-500 ml-1.5 font-sans">
+                              ({h.myWins} Menang / {h.myMatches} Match • Diff{" "}
+                              <span className={h.myDiff > 0 ? "text-[#32580E] font-bold" : h.myDiff < 0 ? "text-red-500 font-bold" : ""}>
+                                {h.myDiff > 0 ? `+${h.myDiff}` : h.myDiff}
+                              </span>)
+                            </span>
+                          )}
                         </div>
                       </div>
 

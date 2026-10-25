@@ -71,6 +71,9 @@ export function FreeGameModal({
       { name: "Andreas", gender: "MALE" as const },
       { name: "Ocan", gender: "MALE" as const },
       { name: "Ardian", gender: "MALE" as const },
+      { name: "Gigih", gender: "MALE" as const },
+      { name: "Lia", gender: "FEMALE" as const },
+      { name: "Joy", gender: "MALE" as const },
     ];
 
     const slice = names.slice(0, count);

@@ -40,14 +40,21 @@ export async function GET() {
       };
     });
 
-    // 2. Find tournaments the user participated in
+    // 2. Find tournaments the user participated in as a player
+    const nameAliases = [user.name];
+    if (user.name.toLowerCase() === "ardhi") nameAliases.push("Ardi", "ardi");
+    if (user.name.toLowerCase() === "savira") nameAliases.push("Vira", "vira");
+
     const userTournaments = await prisma.tournament.findMany({
       where: {
-        OR: [
-          { players: { some: { userId: user.id } } },
-          { players: { some: { name: user.name } } },
-          { club: { members: { some: { userId: user.id } } } },
-        ],
+        players: {
+          some: {
+            OR: [
+              { userId: user.id },
+              { name: { in: nameAliases } },
+            ],
+          },
+        },
       },
       include: {
         club: { select: { id: true, name: true, code: true } },
@@ -124,35 +131,40 @@ export async function GET() {
     let goldTrophies = 0;
     let podiums = 0;
 
-    const personalHistory = completedTournaments.map((t) => {
-      const myPlayer = t.players.find(
-        (p) => p.userId === user.id || p.name === user.name
-      );
+    const personalHistory = completedTournaments
+      .map((t) => {
+        const myPlayer = t.players.find(
+          (p) =>
+            p.userId === user.id ||
+            nameAliases.some((alias) => alias.toLowerCase() === p.name.toLowerCase())
+        );
 
-      if (myPlayer) {
+        if (!myPlayer) return null;
+
         totalMatches += myPlayer.matchesPlayed;
         totalWins += myPlayer.matchesWon;
         totalPoints += myPlayer.pointsScored;
         if (myPlayer.rank === 1) goldTrophies += 1;
         if (myPlayer.rank <= 3) podiums += 1;
-      }
 
-      return {
-        tournamentId: t.id,
-        title: t.title,
-        sportId: t.sportId,
-        format: t.format,
-        targetPoints: t.targetPoints,
-        clubName: t.club?.name || "Free Game",
-        date: t.createdAt,
-        myRank: myPlayer?.rank || null,
-        myPoints: myPlayer?.pointsScored || 0,
-        myMatches: myPlayer?.matchesPlayed || 0,
-        myWins: myPlayer?.matchesWon || 0,
-        totalPlayers: t.players.length,
-        winnerName: t.players[0]?.name || "N/A",
-      };
-    });
+        return {
+          tournamentId: t.id,
+          title: t.title,
+          sportId: t.sportId,
+          format: t.format,
+          targetPoints: t.targetPoints,
+          clubName: t.club?.name || "Free Game",
+          date: t.createdAt,
+          myRank: myPlayer.rank || null,
+          myPoints: myPlayer.pointsScored || 0,
+          myMatches: myPlayer.matchesPlayed || 0,
+          myWins: myPlayer.matchesWon || 0,
+          myDiff: myPlayer.pointDiff || 0,
+          totalPlayers: t.players.length,
+          winnerName: t.players[0]?.name || "N/A",
+        };
+      })
+      .filter(Boolean);
 
     return NextResponse.json({
       user: {
@@ -177,7 +189,9 @@ export async function GET() {
             status: nextGame.status,
             createdAt: nextGame.createdAt,
             myPlayer: nextGame.players.find(
-              (p) => p.userId === user.id || p.name === user.name
+              (p) =>
+                p.userId === user.id ||
+                nameAliases.some((alias) => alias.toLowerCase() === p.name.toLowerCase())
             ),
           }
         : null,

@@ -74,19 +74,40 @@ export async function POST(req: Request) {
       },
     });
 
+    // Pre-fetch all registered users to auto-link players by name or email
+    const allUsers = await prisma.user.findMany({
+      select: { id: true, name: true, email: true },
+    });
+    const userMap = new Map<string, string>();
+    allUsers.forEach((u) => {
+      userMap.set(u.name.toLowerCase().trim(), u.id);
+      userMap.set(u.email.toLowerCase().trim(), u.id);
+      const emailPrefix = u.email.split("@")[0].toLowerCase();
+      userMap.set(emailPrefix, u.id);
+    });
+    // Common aliases
+    if (userMap.has("ardhi")) userMap.set("ardi", userMap.get("ardhi")!);
+    if (userMap.has("savira")) userMap.set("vira", userMap.get("savira")!);
+
     // 2. Create Tournament Players
     const createdPlayers = await Promise.all(
-      players.map((p: any, idx: number) =>
-        prisma.tournamentPlayer.create({
+      players.map((p: any, idx: number) => {
+        const cleanName = (p.name || "").trim();
+        const matchedUserId =
+          p.userId ||
+          userMap.get(cleanName.toLowerCase()) ||
+          null;
+
+        return prisma.tournamentPlayer.create({
           data: {
             tournamentId: tournament.id,
-            userId: p.userId || null,
-            name: p.name.trim() || `Player ${idx + 1}`,
+            userId: matchedUserId,
+            name: cleanName || `Player ${idx + 1}`,
             gender: p.gender || "MALE",
             rank: idx + 1,
           },
-        })
-      )
+        });
+      })
     );
 
     const playerRefs = createdPlayers.map((p) => ({

@@ -15,6 +15,9 @@ const USERS = [
   { name: "Andreas", email: "andreas@yurscore.com", gender: "MALE" },
   { name: "Ocan", email: "ocan@yurscore.com", gender: "MALE" },
   { name: "Ardian", email: "ardian@yurscore.com", gender: "MALE" },
+  { name: "Gigih", email: "gigih@yurscore.com", gender: "MALE" },
+  { name: "Lia", email: "lia@yurscore.com", gender: "FEMALE" },
+  { name: "Joy", email: "joy@yurscore.com", gender: "MALE" },
 ];
 
 async function main() {
@@ -35,7 +38,7 @@ async function main() {
     });
     createdUsers.push(user);
   }
-  console.log(`✅ 12 Users ready.`);
+  console.log(`✅ ${createdUsers.length} Users ready.`);
 
   // 2. Create or ensure Jakarta Padel Masters club
   const reza = createdUsers.find((u) => u.email === "reza@yurscore.com")!;
@@ -56,7 +59,7 @@ async function main() {
     },
   });
 
-  // 3. Register all 12 users as members of the club
+  // 3. Register all users as members of the club
   for (const u of createdUsers) {
     const isOwner = u.id === reza.id;
     await prisma.clubMember.upsert({
@@ -81,7 +84,7 @@ async function main() {
     });
   }
 
-  console.log(`✅ Jakarta Padel Masters club ready with 12 members.`);
+  console.log(`✅ Jakarta Padel Masters club ready with ${createdUsers.length} members.`);
   console.log("🎉 Seeding completed successfully!");
 }
 

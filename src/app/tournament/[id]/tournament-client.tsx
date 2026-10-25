@@ -43,6 +43,7 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
   const [savingMatchId, setSavingMatchId] = useState<string | null>(null);
   const [generatingRound, setGeneratingRound] = useState(false);
   const [completingTournament, setCompletingTournament] = useState(false);
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
 
   // Fetch tournament data
   async function loadData() {
@@ -67,10 +68,14 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
       });
       setEditingScores(scoreMap);
 
-      // Select active round
-      const activeR = data.tournament.rounds?.find((r: any) => r.status === "ACTIVE");
-      if (activeR) {
-        setActiveRoundNumber(activeR.roundNumber);
+      // Select active round or default tab
+      if (data.tournament.status === "COMPLETED") {
+        setActiveTab("standings");
+      } else {
+        const activeR = data.tournament.rounds?.find((r: any) => r.status === "ACTIVE");
+        if (activeR) {
+          setActiveRoundNumber(activeR.roundNumber);
+        }
       }
     } catch (e) {
       console.error(e);
@@ -295,7 +300,7 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
               </span>
             ) : (
               <button
-                onClick={handleCompleteTournament}
+                onClick={() => setShowCompleteConfirm(true)}
                 disabled={completingTournament}
                 className="h-8.5 px-3 sm:px-4 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-2xs hover:shadow-xs transition-all cursor-pointer shrink-0"
               >
@@ -340,7 +345,7 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
             }`}
           >
             <Clock className="w-3.5 h-3.5 text-[#74B72E]" />
-            <span>Jadwal Ronde</span>
+            <span>Jadwal & Hasil Ronde</span>
           </button>
         </div>
       </header>
@@ -350,6 +355,31 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
         {/* TAB 1: COURTS & SCORING */}
         {activeTab === "courts" && (
           <div className="space-y-6">
+            {tournament.status === "COMPLETED" && (
+              <div className="p-4 rounded-2xl bg-[#74B72E]/10 border border-[#74B72E]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#74B72E] text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Trophy className="w-5 h-5 fill-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-[#32580E]">
+                      Turnamen Telah Selesai
+                    </h4>
+                    <p className="text-xs text-slate-600">
+                      Seluruh skor pertandingan telah final dan hasil klasemen resmi tersimpan.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setActiveTab("standings")}
+                  className="px-4 py-2 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Trophy className="w-3.5 h-3.5" />
+                  <span>Lihat Klasemen & Podium Akhir</span>
+                </button>
+              </div>
+            )}
+
             {/* Round Switcher Pills */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-slate-200/90 shadow-2xs p-3 rounded-2xl">
               <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 w-full">
@@ -871,30 +901,69 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
                       ? playerMap.get(m.team2Player2Id)
                       : null;
 
+                    const isCompleted = m.status === "COMPLETED";
+                    const t1Wins = isCompleted && m.team1Score > m.team2Score;
+                    const t2Wins = isCompleted && m.team2Score > m.team1Score;
+
                     return (
                       <div
                         key={m.id}
-                        className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs gap-3"
+                        className={`p-3.5 rounded-2xl border flex items-center justify-between text-xs gap-3 transition-colors ${
+                          isCompleted
+                            ? "bg-slate-50 border-slate-200"
+                            : "bg-white border-slate-200/90 shadow-2xs"
+                        }`}
                       >
-                        <div className="min-w-0 flex-1">
-                          <div className="text-[10px] text-slate-400 font-bold uppercase mb-1">
-                            Court {m.courtNumber}
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-slate-400 font-bold uppercase">
+                              Court {m.courtNumber}
+                            </span>
+                            <span
+                              className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${
+                                isCompleted
+                                  ? "bg-slate-200/80 text-slate-700"
+                                  : "bg-[#74B72E]/10 text-[#32580E]"
+                              }`}
+                            >
+                              {isCompleted ? "Final" : "In Progress"}
+                            </span>
                           </div>
-                          <div className="font-bold text-slate-900 truncate">
-                            {t1p1} {t1p2 && `& ${t1p2}`}
+
+                          <div
+                            className={`truncate flex items-center gap-1.5 ${
+                              t1Wins ? "font-black text-slate-900" : "font-medium text-slate-600"
+                            }`}
+                          >
+                            {t1Wins && <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+                            <span>{t1p1} {t1p2 && `& ${t1p2}`}</span>
                           </div>
-                          <div className="text-slate-500 text-[11px] mt-0.5 truncate">
-                            vs {t2p1} {t2p2 && `& ${t2p2}`}
+
+                          <div
+                            className={`truncate flex items-center gap-1.5 ${
+                              t2Wins ? "font-black text-slate-900" : "font-medium text-slate-600"
+                            }`}
+                          >
+                            {t2Wins && <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+                            <span>{t2p1} {t2p2 && `& ${t2p2}`}</span>
                           </div>
                         </div>
 
-                        <div className="text-right shrink-0">
-                          <div className="font-mono font-bold text-sm text-[#32580E]">
-                            {m.team1Score} - {m.team2Score}
+                        <div className="text-right shrink-0 bg-white px-3 py-1.5 rounded-xl border border-slate-200/80 space-y-0.5">
+                          <div className="font-mono text-sm font-black flex items-center justify-end gap-1.5">
+                            <span className={t1Wins ? "text-[#32580E]" : "text-slate-700"}>
+                              {m.team1Score}
+                            </span>
+                            <span className="text-slate-300">-</span>
+                            <span className={t2Wins ? "text-[#32580E]" : "text-slate-700"}>
+                              {m.team2Score}
+                            </span>
                           </div>
-                          <div className="text-[10px] text-slate-400 font-medium mt-0.5">
-                            {m.status === "COMPLETED" ? "Final" : "In Progress"}
-                          </div>
+                          {isCompleted && (
+                            <div className="text-[9px] font-bold text-slate-400 uppercase">
+                              {t1Wins ? "Tim 1 Menang" : t2Wins ? "Tim 2 Menang" : "Seri"}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -905,6 +974,53 @@ export function TournamentClient({ tournamentId }: { tournamentId: string }) {
           </div>
         )}
       </main>
+
+      {/* Confirmation Modal: Selesaikan Turnamen */}
+      {showCompleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-3xl bg-white border border-slate-200 shadow-2xl p-6 space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+              <Award className="w-6 h-6" />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-bold text-slate-900">
+                Selesaikan Turnamen?
+              </h3>
+              <p className="text-xs text-slate-600 mt-1">
+                Progress saat ini: <strong>{stats?.completedMatchesCount || 0}</strong> dari{" "}
+                <strong>{stats?.totalMatchesCount || 0}</strong> match selesai.
+              </p>
+              <p className="text-xs text-slate-500 mt-2">
+                Setelah diselesaikan, seluruh skor akan dikunci secara permanen, podium juara
+                akan dihitung, dan riwayat akan tercatat di dashboard seluruh pemain.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowCompleteConfirm(false)}
+                className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={completingTournament}
+                onClick={async () => {
+                  setShowCompleteConfirm(false);
+                  await handleCompleteTournament();
+                }}
+                className="px-5 py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white text-xs font-extrabold flex items-center gap-1.5 shadow-xs cursor-pointer transition-all"
+              >
+                <Check className="w-4 h-4" />
+                <span>{completingTournament ? "Menyelesaikan..." : "Ya, Selesaikan & Kunci"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
