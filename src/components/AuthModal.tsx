@@ -1,80 +1,71 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   X,
   Mail,
   Lock,
   User,
-  Sparkles,
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
-
-interface UserItem {
-  id: string;
-  name: string;
-  email: string;
-  gender: string;
-}
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  availableUsers: UserItem[];
   onLoginSuccess: (user: any) => void;
+  initialTab?: "login" | "register";
+  initialEmail?: string;
+  customInviteNotice?: string | null;
 }
 
 export function AuthModal({
   isOpen,
   onClose,
-  availableUsers,
   onLoginSuccess,
+  initialTab = "login",
+  initialEmail = "",
+  customInviteNotice = null,
 }: AuthModalProps) {
-  const [tab, setTab] = useState<"demo" | "login" | "register">("login");
-  const [email, setEmail] = useState("");
+  const [tab, setTab] = useState<"login" | "register">(initialTab);
+  const [email, setEmail] = useState(initialEmail);
   const [name, setName] = useState("");
-  const [password, setPassword] = useState("password123");
-  const [gender, setGender] = useState("MALE");
+  const [password, setPassword] = useState("");
+  const [gender, setGender] = useState<"MALE" | "FEMALE">("MALE");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [registeredNotice, setRegisteredNotice] = useState<string | null>(null);
 
-  if (!isOpen) return null;
-
-  async function handleDemoLogin(userId: string) {
-    setLoading(true);
+  useEffect(() => {
+    if (initialTab) setTab(initialTab);
+    if (initialEmail) setEmail(initialEmail);
     setError(null);
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      onLoginSuccess(data.user);
-      onClose();
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }
+  }, [isOpen, initialTab, initialEmail]);
+
+  if (!isOpen) return null;
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
+    if (!email.trim() || !password) {
+      setError("Email dan password wajib diisi");
+      return;
+    }
+
     setLoading(true);
     setError(null);
+
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+
       onLoginSuccess(data.user);
       onClose();
     } catch (e: any) {
@@ -86,14 +77,31 @@ export function AuthModal({
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+    if (!name.trim() || !email.trim() || !password) {
+      setError("Nama, email, dan password wajib diisi");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password minimal 6 karakter");
+      return;
+    }
+
     setLoading(true);
     setError(null);
+
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, gender }),
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+          gender,
+        }),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
@@ -104,7 +112,7 @@ export function AuthModal({
         setTimeout(() => {
           onLoginSuccess(data.user);
           onClose();
-        }, 1800);
+        }, 1500);
       } else {
         onLoginSuccess(data.user);
         onClose();
@@ -118,7 +126,7 @@ export function AuthModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 shadow-2xl p-5 sm:p-6">
+      <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 shadow-2xl p-5 sm:p-7">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -128,52 +136,62 @@ export function AuthModal({
         </button>
 
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-5">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#74B72E]/10 text-[#32580E] text-xs font-semibold mb-2 border border-[#74B72E]/25">
             <ShieldCheck className="w-3.5 h-3.5 text-[#74B72E]" /> YurScore Authentication
           </div>
-          <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Masuk ke YurScore</h2>
+          <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
+            {tab === "login" ? "Masuk ke Akun Anda" : "Daftar Akun Baru"}
+          </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Kelola club, undang anggota, atau buat turnamen tersimpan.
+            {tab === "login"
+              ? "Gunakan email dan password terdaftar untuk mengakses dashboard."
+              : "Buat akun untuk bergabung ke club dan menyimpan rekor pertandingan."}
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex rounded-xl bg-slate-100 p-1 mb-6 border border-slate-200">
+        {/* Custom Invite Notification banner if opened via invite link */}
+        {customInviteNotice && (
+          <div className="mb-4 p-3 rounded-2xl bg-[#74B72E]/10 border border-[#74B72E]/30 text-xs text-[#32580E] flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#74B72E] shrink-0 mt-0.5" />
+            <span>{customInviteNotice}</span>
+          </div>
+        )}
+
+        {/* Tabs: Masuk vs Daftar */}
+        <div className="flex rounded-xl bg-slate-100 p-1 mb-5 border border-slate-200">
           <button
-            onClick={() => setTab("login")}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            type="button"
+            onClick={() => {
+              setTab("login");
+              setError(null);
+            }}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               tab === "login"
-                ? "bg-[#74B72E] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-500 hover:text-slate-900"
             }`}
           >
-            Login Email
+            Masuk Akun
           </button>
           <button
-            onClick={() => setTab("register")}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            type="button"
+            onClick={() => {
+              setTab("register");
+              setError(null);
+            }}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               tab === "register"
-                ? "bg-[#74B72E] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-500 hover:text-slate-900"
             }`}
           >
             Daftar Akun
           </button>
-          <button
-            onClick={() => setTab("demo")}
-            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-              tab === "demo"
-                ? "bg-[#74B72E] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Akun Demo
-          </button>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 font-medium">
+          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 font-medium leading-relaxed">
             {error}
           </div>
         )}
@@ -185,44 +203,11 @@ export function AuthModal({
           </div>
         )}
 
-        {/* Tab 1: Instant Demo Switch */}
-        {tab === "demo" && (
-          <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-            <p className="text-xs text-slate-500 mb-2">
-              Pilih salah satu akun pengguna di bawah untuk mencoba langsung fitur:
-            </p>
-            {availableUsers.map((u) => (
-              <button
-                key={u.id}
-                disabled={loading}
-                onClick={() => handleDemoLogin(u.id)}
-                className="w-full flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-[#74B72E]/5 border border-slate-200 hover:border-[#74B72E]/50 transition-all group text-left cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#74B72E]/15 border border-[#74B72E]/30 flex items-center justify-center font-bold text-[#32580E] text-xs">
-                    {u.name.slice(0, 2).toUpperCase()}
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-900 group-hover:text-[#32580E] transition-colors">
-                      {u.name}
-                    </div>
-                    <div className="text-xs text-slate-500">{u.email}</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-slate-400 group-hover:text-[#32580E] font-semibold">
-                  <span>Masuk</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Tab 2: Login Email */}
+        {/* TAB 1: LOGIN FORM */}
         {tab === "login" && (
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+              <label className="text-xs font-semibold text-slate-700 block mb-1">
                 Alamat Email
               </label>
               <div className="relative">
@@ -230,49 +215,72 @@ export function AuthModal({
                 <input
                   type="email"
                   required
-                  placeholder="reza@yurscore.com"
+                  placeholder="nama@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E] focus:ring-1 focus:ring-[#74B72E]/30 transition-colors"
+                  className="w-full bg-slate-50 focus:bg-white border border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#74B72E] transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-semibold text-slate-700 block">
+                  Password
+                </label>
+              </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                 <input
                   type="password"
                   required
-                  placeholder="••••••••"
+                  placeholder="Masukkan password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E] focus:ring-1 focus:ring-[#74B72E]/30 transition-colors"
+                  className="w-full bg-slate-50 focus:bg-white border border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#74B72E] transition-colors"
                 />
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                (Untuk akun demo default password: password123)
-              </p>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] font-bold text-white text-sm transition-all shadow-md shadow-[#74B72E]/25 disabled:opacity-50 cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
-              {loading ? "Memproses..." : "Masuk ke Akun"}
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Memverifikasi...</span>
+                </>
+              ) : (
+                <>
+                  <span>Masuk Akun</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </>
+              )}
             </button>
+
+            <div className="pt-2 text-center text-xs text-slate-500">
+              Belum punya akun?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setTab("register");
+                  setError(null);
+                }}
+                className="text-[#32580E] font-bold hover:underline cursor-pointer"
+              >
+                Daftar sekarang
+              </button>
+            </div>
           </form>
         )}
 
-        {/* Tab 3: Register */}
+        {/* TAB 2: REGISTER FORM */}
         {tab === "register" && (
-          <form onSubmit={handleRegister} className="space-y-3.5">
+          <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
+              <label className="text-xs font-semibold text-slate-700 block mb-1">
                 Nama Lengkap
               </label>
               <div className="relative">
@@ -280,71 +288,110 @@ export function AuthModal({
                 <input
                   type="text"
                   required
-                  placeholder="Nama Lengkap"
+                  placeholder="Contoh: Reza Wardhana"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E] focus:ring-1 focus:ring-[#74B72E]/30 transition-colors"
+                  className="w-full bg-slate-50 focus:bg-white border border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#74B72E] transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
-                Email
+              <label className="text-xs font-semibold text-slate-700 block mb-1">
+                Alamat Email
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                 <input
                   type="email"
                   required
-                  placeholder="user@example.com"
+                  placeholder="nama@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E] focus:ring-1 focus:ring-[#74B72E]/30 transition-colors"
+                  className="w-full bg-slate-50 focus:bg-white border border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#74B72E] transition-colors"
                 />
               </div>
-              <p className="text-[10px] text-slate-500 mt-1">
-                * Jika Anda menerima undangan club ke email ini, status membership akan otomatis aktif!
-              </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
-                  Gender
-                </label>
-                <select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E]"
-                >
-                  <option value="MALE">Laki-laki (Male)</option>
-                  <option value="FEMALE">Perempuan (Female)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">
-                  Password
-                </label>
+            <div>
+              <label className="text-xs font-semibold text-slate-700 block mb-1">
+                Password (min 6 karakter)
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                 <input
                   type="password"
                   required
-                  placeholder="••••••••"
+                  minLength={6}
+                  placeholder="Minimal 6 karakter"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-[#74B72E]"
+                  className="w-full bg-slate-50 focus:bg-white border border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#74B72E] transition-colors"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-700 block mb-1">
+                Jenis Kelamin (untuk penyeimbangan rotasi partner)
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setGender("MALE")}
+                  className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    gender === "MALE"
+                      ? "bg-[#74B72E]/10 border-[#74B72E] text-[#32580E]"
+                      : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  Pria (Male)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGender("FEMALE")}
+                  className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                    gender === "FEMALE"
+                      ? "bg-[#74B72E]/10 border-[#74B72E] text-[#32580E]"
+                      : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  Wanita (Female)
+                </button>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] font-bold text-white text-sm transition-all shadow-md shadow-[#74B72E]/25 disabled:opacity-50 mt-2 cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-[#74B72E] hover:bg-[#639E25] text-white font-bold text-xs sm:text-sm transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
-              {loading ? "Mendaftar..." : "Daftar & Masuk"}
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Mendaftarkan Akun...</span>
+                </>
+              ) : (
+                <>
+                  <span>Daftar Akun Baru</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </>
+              )}
             </button>
+
+            <div className="pt-2 text-center text-xs text-slate-500">
+              Sudah punya akun?{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setTab("login");
+                  setError(null);
+                }}
+                className="text-[#32580E] font-bold hover:underline cursor-pointer"
+              >
+                Masuk di sini
+              </button>
+            </div>
           </form>
         )}
       </div>

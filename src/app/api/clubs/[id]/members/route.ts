@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { sendClubInviteEmail } from "@/lib/email";
 
 export async function POST(
   req: Request,
@@ -38,14 +39,9 @@ export async function POST(
       },
     });
 
-    if (existingMember) {
+    if (existingMember && existingMember.status === "ACTIVE") {
       return NextResponse.json(
-        {
-          error:
-            existingMember.status === "ACTIVE"
-              ? "Member ini sudah aktif di club"
-              : "Undangan sudah dikirim ke email ini sebelumnya",
-        },
+        { error: "Member ini sudah aktif terdaftar di club" },
         { status: 400 }
       );
     }
@@ -58,7 +54,11 @@ export async function POST(
     let newMember;
     let inviteNotice = "";
 
-    if (registeredUser) {
+    if (existingMember && existingMember.status === "PENDING_INVITE") {
+      // Re-send invite
+      newMember = existingMember;
+      inviteNotice = `Email undangan telah dikirim ulang ke ${cleanEmail}.`;
+    } else if (registeredUser) {
       // User is already registered! Automatically activate membership
       newMember = await prisma.clubMember.create({
         data: {
@@ -84,11 +84,27 @@ export async function POST(
       inviteNotice = `Undangan email telah dikirim ke ${cleanEmail}. Ketika member registrasi dengan email tersebut, otomatis bergabung ke ${club.name}.`;
     }
 
+    const hostHeader = req.headers.get("x-forwarded-host") || req.headers.get("host") || "localhost:3000";
+    const protoHeader = req.headers.get("x-forwarded-proto") || "http";
+    const baseOrigin = `${protoHeader}://${hostHeader}`;
+    const directInviteLink = `${baseOrigin}/?clubInvite=${club.code}&inviteEmail=${encodeURIComponent(cleanEmail)}`;
+
+    // Dispatch transactional email (Resend / Simulated)
+    const emailResult = await sendClubInviteEmail({
+      toEmail: cleanEmail,
+      clubName: club.name,
+      clubCode: club.code,
+      inviterName: user.name,
+      inviteLink: directInviteLink,
+    });
+
     return NextResponse.json({
       success: true,
       member: newMember,
       notice: inviteNotice,
       isRegistered: Boolean(registeredUser),
+      inviteLink: directInviteLink,
+      emailResult,
       invitationDetails: {
         to: cleanEmail,
         clubName: club.name,

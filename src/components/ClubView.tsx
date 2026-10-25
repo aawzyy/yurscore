@@ -101,6 +101,8 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
   const [inviteRole, setInviteRole] = useState("MEMBER");
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteSuccessNotice, setInviteSuccessNotice] = useState<string | null>(null);
+  const [inviteSuccessLink, setInviteSuccessLink] = useState<string | null>(null);
+  const [copiedInviteLink, setCopiedInviteLink] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
 
@@ -285,6 +287,7 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
     setInviteLoading(true);
     setInviteError(null);
     setInviteSuccessNotice(null);
+    setInviteSuccessLink(null);
 
     try {
       const res = await fetch(`/api/clubs/${club.id}/members`, {
@@ -296,6 +299,7 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
       if (!res.ok) throw new Error(data.error);
 
       setInviteSuccessNotice(data.notice);
+      setInviteSuccessLink(data.inviteLink || null);
       setInviteEmail("");
       await onRefreshClub();
     } catch (e: any) {
@@ -836,9 +840,27 @@ export function ClubView({ club, currentUser, onRefreshClub, onDeletedClub }: Cl
                 </div>
 
                 {inviteSuccessNotice && (
-                  <div className="p-3 rounded-xl bg-[#74B72E]/10 border border-[#74B72E]/25 text-xs text-[#32580E] flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-[#74B72E]" />
-                    <span>{inviteSuccessNotice}</span>
+                  <div className="p-3.5 rounded-2xl bg-[#74B72E]/10 border border-[#74B72E]/25 text-xs text-[#32580E] space-y-2">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-[#74B72E]" />
+                      <span>{inviteSuccessNotice}</span>
+                    </div>
+                    {inviteSuccessLink && (
+                      <div className="pt-1 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(inviteSuccessLink);
+                            setCopiedInviteLink(true);
+                            setTimeout(() => setCopiedInviteLink(false), 2000);
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-white border border-[#74B72E]/40 text-[#32580E] font-bold text-xs inline-flex items-center gap-1.5 shadow-2xs hover:bg-[#74B72E]/10 transition-colors cursor-pointer"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                          <span>{copiedInviteLink ? "Tautan Tersalin!" : "Salin Link Registrasi Email"}</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 

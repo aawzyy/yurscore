@@ -20,6 +20,7 @@ import {
   LayoutDashboard,
   ArrowLeft,
   Settings,
+  X,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { AuthModal } from "@/components/AuthModal";
@@ -35,7 +36,6 @@ import {
 
 export default function HomePage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [clubs, setClubs] = useState<any[]>([]);
   const [selectedClubId, setSelectedClubId] = useState<string | null>(null);
   const [selectedSport, setSelectedSport] = useState<SportId>("padel");
@@ -48,6 +48,11 @@ export default function HomePage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showFreeGameModal, setShowFreeGameModal] = useState(false);
   const [showCreateClubModal, setShowCreateClubModal] = useState(false);
+
+  // Invite parameter states
+  const [inviteNotice, setInviteNotice] = useState<string | null>(null);
+  const [initialAuthEmail, setInitialAuthEmail] = useState("");
+  const [joinClubNotice, setJoinClubNotice] = useState<string | null>(null);
 
   // New Club form state
   const [newClubName, setNewClubName] = useState("");
@@ -62,7 +67,6 @@ export default function HomePage() {
       const userRes = await fetch("/api/auth/me");
       const userData = await userRes.json();
       setCurrentUser(userData.user);
-      setAvailableUsers(userData.availableUsers || []);
 
       if (userData.user) {
         // Fetch personalized member/admin dashboard
@@ -85,6 +89,46 @@ export default function HomePage() {
       } else {
         setViewMode("public");
       }
+
+      // Check URL query parameters for club invite or email registration
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        const clubCode = params.get("clubInvite");
+        const inviteEmail = params.get("inviteEmail");
+
+        if (inviteEmail) {
+          setInitialAuthEmail(inviteEmail);
+        }
+
+        if (clubCode) {
+          if (userData.user) {
+            // User is logged in: join club automatically
+            try {
+              const joinRes = await fetch("/api/clubs/join", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ code: clubCode }),
+              });
+              const joinData = await joinRes.json();
+              if (joinRes.ok) {
+                setJoinClubNotice(joinData.message);
+                if (joinData.club) {
+                  setSelectedClubId(joinData.club.id);
+                  setViewMode("club");
+                }
+              }
+            } catch (err) {
+              console.error("Join club error:", err);
+            }
+          } else {
+            // User not logged in: show invitation notice & open registration modal
+            setInviteNotice(
+              `Anda diundang bergabung ke club dengan kode "${clubCode}". Silakan daftar atau masuk untuk otomatis terhubung.`
+            );
+            setShowAuthModal(true);
+          }
+        }
+      }
     } catch (e) {
       console.error("Failed loading data:", e);
     }
@@ -93,24 +137,6 @@ export default function HomePage() {
   useEffect(() => {
     loadInitialData();
   }, []);
-
-  async function handleSwitchUser(userId: string) {
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setCurrentUser(data.user);
-        await loadInitialData();
-        setViewMode("dashboard");
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -163,14 +189,28 @@ export default function HomePage() {
       {/* Navbar */}
       <Navbar
         currentUser={currentUser}
-        allUsers={availableUsers}
-        onSwitchUser={handleSwitchUser}
         onOpenAuth={() => setShowAuthModal(true)}
         onLogout={handleLogout}
         onStartFreeGame={() => setShowFreeGameModal(true)}
+        onGoToDashboard={() => setViewMode("dashboard")}
       />
 
       <main className="flex-1 max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 w-full space-y-6 sm:space-y-8">
+        {/* Join Club / Invite Notification Banner */}
+        {joinClubNotice && (
+          <div className="p-3.5 rounded-2xl bg-[#74B72E]/10 border border-[#74B72E]/30 text-xs text-[#32580E] flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-[#74B72E] shrink-0" />
+              <span className="font-semibold">{joinClubNotice}</span>
+            </div>
+            <button
+              onClick={() => setJoinClubNotice(null)}
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
         {/* =========================================================================
             STATE 1: LOGGED-IN MEMBER / ADMIN DASHBOARD VIEW
            ========================================================================= */}
@@ -467,8 +507,13 @@ export default function HomePage() {
       {/* Auth Modal */}
       <AuthModal
         isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        availableUsers={availableUsers}
+        onClose={() => {
+          setShowAuthModal(false);
+          setInviteNotice(null);
+        }}
+        initialTab={inviteNotice ? "register" : "login"}
+        initialEmail={initialAuthEmail}
+        customInviteNotice={inviteNotice}
         onLoginSuccess={(user) => {
           setCurrentUser(user);
           loadInitialData();
